@@ -6,3 +6,6 @@ build:
 
 add: build
 	@./bin/tasks add "example description"
+
+list: build
+	@./bin/tasks list

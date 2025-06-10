@@ -13,7 +13,7 @@ var id int = 0
 
 type FileStorage interface {
 	AddTask(task string) error
-	ListTasks() ([]string, error)
+	ListTasks() error
 	CompleteTask(id int) error
 }
 

@@ -58,10 +58,84 @@ func (s *CSVStorage) AddTask(task string) error {
 	return nil
 }
 
-func (s *CSVStorage) ListTasks() ([]string, error) {
-	return nil, nil
+func (s *CSVStorage) ListTasks() error {
+	file, err := LoadFile(s.path)
+	if err != nil {
+		return fmt.Errorf("error loading file: %w", err)
+	}
+	defer CloseFile(file)
+
+	csvReader := csv.NewReader(file)
+
+	records, err := csvReader.ReadAll()
+	if err != nil {
+		return err
+	}
+
+	if len(records) == 0 {
+		fmt.Println("No tasks found in the file")
+		return nil
+	}
+
+	var tasks []Task
+	for _, record := range records {
+		if record[0] == "ID" {
+			continue // Skip the header row
+		}
+		task, err := newTask(record)
+		if err != nil {
+			return err
+		}
+		tasks = append(tasks, task)
+	}
+
+	if len(tasks) == 0 {
+		fmt.Println("No tasks found in the file: header only")
+		return nil
+	}
+
+	fmt.Println("Total tasks:", len(tasks))
+
+	for _, task := range tasks {
+		fmt.Printf("ID: %d, Task: %s, CreatedAt: %s, IsComplete: %t\n", task.ID, task.Task, task.CreatedAt.Format("Mon Jan 2 15:04:05"), task.IsComplete)
+	}
+	return nil
 }
 
 func (s *CSVStorage) CompleteTask(id int) error {
 	return nil
+}
+
+type Task struct {
+	ID         int
+	Task       string
+	CreatedAt  time.Time
+	IsComplete bool
+}
+
+func newTask(record []string) (Task, error) {
+	if len(record) < 4 {
+		return Task{}, fmt.Errorf("record does not contain enough fields: %v", record)
+	}
+
+	id, err := strconv.Atoi(record[0])
+	if err != nil {
+		return Task{}, fmt.Errorf("error converting ID to integer: %w", err)
+	}
+
+	task := record[1]
+
+	createdAt, err := time.Parse("Mon Jan 2 15:04:05", record[2])
+	if err != nil {
+		return Task{}, fmt.Errorf("error parsing created at time: %w", err)
+	}
+
+	isComplete := record[3]
+
+	return Task{
+		ID:         id,
+		Task:       task,
+		CreatedAt:  createdAt,
+		IsComplete: isComplete == "true",
+	}, nil
 }
