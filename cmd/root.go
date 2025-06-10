@@ -19,11 +19,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/MoXcz/tasks/file"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var cfgFile string
+var storage file.FileStorage
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -98,6 +100,13 @@ func initConfig() {
 	if verbose == true {
 		fmt.Fprintln(os.Stderr, "using config file:", viper.ConfigFileUsed())
 	}
+
+	s, err := file.SelectStorage()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "error selecting storage:", err)
+		os.Exit(1) // TODO: most probably an invalid storage type, verify it
+	}
+	storage = s
 }
 
 // writes default configuration to the user's config directory
@@ -112,6 +121,7 @@ func writeDefaultConfig() error {
 	// this is a personal choice
 	viper.SetDefault("file", filePath+"/tasks.csv")
 	viper.SetDefault("verbose", false)
+	viper.SetDefault("storage", "csv")
 
 	err = os.Mkdir(filePath, 0755)
 	if err != nil && !os.IsExist(err) {

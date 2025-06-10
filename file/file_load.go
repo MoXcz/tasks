@@ -1,4 +1,7 @@
-package helpers
+/*
+Copyright © 2025 Oscar Marquez
+*/
+package file
 
 import (
 	"fmt"
