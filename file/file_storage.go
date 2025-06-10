@@ -9,8 +9,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var id int = 0
-
 type FileStorage interface {
 	AddTask(task string) error
 	ListTasks() error

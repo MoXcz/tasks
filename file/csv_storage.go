@@ -43,12 +43,29 @@ func (s *CSVStorage) AddTask(task string) error {
 		}
 	}
 
-	record := []string{strconv.Itoa(id), task, time.Now().Format("Mon Jan 2 15:04:05"), "false"}
+	csvReader := csv.NewReader(file)
+	// Read the existing records to find the next ID
+	records, err := csvReader.ReadAll()
+	if err != nil {
+		return fmt.Errorf("error reading existing records: %w", err)
+	}
+
+	lastID := 0 // if len(records) < 0, lastID will be 1 (+1 below)
+	if len(records) > 0 {
+		lastRecord := records[len(records)-1]
+		if lastRecord[0] != "ID" { // Skip header
+			lastID, err = strconv.Atoi(lastRecord[0])
+			if err != nil {
+				return fmt.Errorf("error converting last ID to integer: %w", err)
+			}
+		}
+	}
+
+	record := []string{strconv.Itoa(lastID + 1), task, time.Now().Format("Mon Jan 2 15:04:05"), "false"}
 	// TODO: use time.Parse(), read the time and then timediff.TimeDiff(time.Now().Add(time.Parse()))
 	if err := csvWriter.Write(record); err != nil {
 		return fmt.Errorf("error writing task to file: %w", err)
 	}
-	id++
 
 	csvWriter.Flush()
 	if err := csvWriter.Error(); err != nil {
