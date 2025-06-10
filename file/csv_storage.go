@@ -18,12 +18,6 @@ type CSVStorage struct {
 
 func NewCSVStorage(path string) (*CSVStorage, error) {
 	taskFile := viper.GetString("file")
-	file, err := LoadFile(taskFile)
-	if err != nil {
-		return &CSVStorage{}, fmt.Errorf("error loading task file: %w", err)
-	}
-	defer CloseFile(file)
-
 	return &CSVStorage{
 		path: taskFile,
 	}, nil
@@ -31,11 +25,15 @@ func NewCSVStorage(path string) (*CSVStorage, error) {
 
 func (s *CSVStorage) AddTask(task string) error {
 	file, err := LoadFile(s.path)
+	if err != nil {
+		return fmt.Errorf("error loading file: %w", err)
+	}
+	defer CloseFile(file)
+
 	fileInfo, err := file.Stat()
 	if err != nil {
 		return fmt.Errorf("error getting file info: %w", err)
 	}
-	defer CloseFile(file)
 
 	csvWriter := csv.NewWriter(file)
 	// Write the header if the file is empty
