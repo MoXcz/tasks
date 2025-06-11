@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -17,12 +18,12 @@ var listCmd = &cobra.Command{
 tasks list to list all tasks`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
-			fmt.Println("This command does not accept any arguments.")
+			fmt.Fprintln(os.Stdin, "This command does not accept any arguments.")
 			return
 		}
 
 		if err := storage.ListTasks(); err != nil {
-			fmt.Printf("Error listing tasks: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error listing tasks: %v\n", err)
 			return
 		}
 	},
