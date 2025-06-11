@@ -122,8 +122,13 @@ func (s *CSVStorage) CompleteTask(id int) error {
 }
 
 func printTasks(tasks []Task) {
+	printAll := viper.GetBool("all")
 	for _, task := range tasks {
 		if !task.IsComplete {
+			fmt.Printf("ID: %d, Task: %s, CreatedAt: %s, IsComplete: %t\n", task.ID, task.Task, task.CreatedAt.Format("Mon Jan 2 15:04:05"), task.IsComplete)
+			continue
+		}
+		if printAll {
 			fmt.Printf("ID: %d, Task: %s, CreatedAt: %s, IsComplete: %t\n", task.ID, task.Task, task.CreatedAt.Format("Mon Jan 2 15:04:05"), task.IsComplete)
 		}
 	}

@@ -31,4 +31,6 @@ tasks list to list all tasks`,
 
 func init() {
 	rootCmd.AddCommand(listCmd)
+
+	listCmd.Flags().BoolP("all", "a", false, "List all tasks including completed ones")
 }
