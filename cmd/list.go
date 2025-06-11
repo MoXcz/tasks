@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // listCmd represents the list command
@@ -33,4 +34,5 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 
 	listCmd.Flags().BoolP("all", "a", false, "List all tasks including completed ones")
+	viper.BindPFlag("all", listCmd.Flags().Lookup("all"))
 }
