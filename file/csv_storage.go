@@ -112,10 +112,8 @@ func (s *CSVStorage) ListTasks() error {
 	}
 
 	fmt.Println("Total tasks:", len(tasks))
+	printTasks(tasks)
 
-	for _, task := range tasks {
-		fmt.Printf("ID: %d, Task: %s, CreatedAt: %s, IsComplete: %t\n", task.ID, task.Task, task.CreatedAt.Format("Mon Jan 2 15:04:05"), task.IsComplete)
-	}
 	return nil
 }
 
@@ -123,36 +121,10 @@ func (s *CSVStorage) CompleteTask(id int) error {
 	return nil
 }
 
-type Task struct {
-	ID         int
-	Task       string
-	CreatedAt  time.Time
-	IsComplete bool
-}
-
-func newTask(record []string) (Task, error) {
-	if len(record) < 4 {
-		return Task{}, fmt.Errorf("record does not contain enough fields: %v", record)
+func printTasks(tasks []Task) {
+	for _, task := range tasks {
+		if !task.IsComplete {
+			fmt.Printf("ID: %d, Task: %s, CreatedAt: %s, IsComplete: %t\n", task.ID, task.Task, task.CreatedAt.Format("Mon Jan 2 15:04:05"), task.IsComplete)
+		}
 	}
-
-	id, err := strconv.Atoi(record[0])
-	if err != nil {
-		return Task{}, fmt.Errorf("error converting ID to integer: %w", err)
-	}
-
-	task := record[1]
-
-	createdAt, err := time.Parse("Mon Jan 2 15:04:05", record[2])
-	if err != nil {
-		return Task{}, fmt.Errorf("error parsing created at time: %w", err)
-	}
-
-	isComplete := record[3]
-
-	return Task{
-		ID:         id,
-		Task:       task,
-		CreatedAt:  createdAt,
-		IsComplete: isComplete == "true",
-	}, nil
 }
