@@ -6,6 +6,7 @@ package file
 import (
 	"encoding/csv"
 	"fmt"
+	"os"
 	"strconv"
 	"time"
 
@@ -76,34 +77,9 @@ func (s *CSVStorage) AddTask(task string) error {
 }
 
 func (s *CSVStorage) ListTasks() error {
-	file, err := LoadFile(s.path)
+	tasks, err := readTasksCSV(s.path)
 	if err != nil {
-		return fmt.Errorf("error loading file: %w", err)
-	}
-	defer CloseFile(file)
-
-	csvReader := csv.NewReader(file)
-
-	records, err := csvReader.ReadAll()
-	if err != nil {
-		return err
-	}
-
-	if len(records) == 0 {
-		fmt.Println("No tasks found in the file")
-		return nil
-	}
-
-	var tasks []Task
-	for _, record := range records {
-		if record[0] == "ID" {
-			continue // Skip the header row
-		}
-		task, err := newTask(record)
-		if err != nil {
-			return err
-		}
-		tasks = append(tasks, task)
+		return err // Error already formatted in readTasksCSV
 	}
 
 	if len(tasks) == 0 {
@@ -118,18 +94,86 @@ func (s *CSVStorage) ListTasks() error {
 }
 
 func (s *CSVStorage) CompleteTask(id int) error {
+	if id <= 0 {
+		return fmt.Errorf("task ID must be greater than 0, got %d", id)
+	}
+
+	found := false
+	tasks, err := readTasksCSV(s.path)
+	if err != nil {
+		return err
+	}
+
+	// I'd think it's necessary to iterate through the list of tasks to make sure
+	// both that the task exists and that it's not already completed
+	for i, task := range tasks {
+		if task.ID == id && task.IsComplete {
+			return fmt.Errorf("task with ID %d is already completed", id)
+		}
+		if task.ID == id {
+			fmt.Println("Completing task:", task.Task)
+			tasks[i].IsComplete = true
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("task with ID %d not found", id)
+	}
+
+	file, err := LoadFile(s.path)
+	if err != nil {
+		return fmt.Errorf("error loading file: %w", err)
+	}
+
+	os.Truncate(s.path, 0)
+	csvWriter := csv.NewWriter(file)
+	for _, task := range tasks {
+		record := []string{
+			strconv.Itoa(task.ID),
+			task.Task,
+			task.CreatedAt.Format("Mon Jan 2 15:04:05"),
+			strconv.FormatBool(task.IsComplete),
+		}
+		if err := csvWriter.Write(record); err != nil {
+			return fmt.Errorf("error writing task to file: %w", err)
+		}
+	}
+
+	csvWriter.Flush()
 	return nil
 }
 
-func printTasks(tasks []Task) {
-	printAll := viper.GetBool("all")
-	for _, task := range tasks {
-		if !task.IsComplete {
-			fmt.Printf("ID: %d, Task: %s, CreatedAt: %s, IsComplete: %t\n", task.ID, task.Task, task.CreatedAt.Format("Mon Jan 2 15:04:05"), task.IsComplete)
-			continue
-		}
-		if printAll {
-			fmt.Printf("ID: %d, Task: %s, CreatedAt: %s, IsComplete: %t\n", task.ID, task.Task, task.CreatedAt.Format("Mon Jan 2 15:04:05"), task.IsComplete)
-		}
+func readTasksCSV(path string) ([]Task, error) {
+	file, err := LoadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("error loading file: %w", err)
 	}
+	defer CloseFile(file)
+
+	csvReader := csv.NewReader(file)
+
+	records, err := csvReader.ReadAll()
+	if err != nil {
+		return nil, fmt.Errorf("error reading CSV file: %w", err)
+	}
+
+	if len(records) == 0 {
+		fmt.Println("No tasks found in the file")
+		return nil, nil
+	}
+	var tasks []Task
+	for _, record := range records {
+		if record[0] == "ID" {
+			continue // Skip the header row
+		}
+		task, err := newTask(record)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, task)
+	}
+
+	return tasks, nil
 }

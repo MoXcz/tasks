@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 type Task struct {
@@ -38,4 +40,18 @@ func newTask(record []string) (Task, error) {
 		CreatedAt:  createdAt,
 		IsComplete: isComplete == "true",
 	}, nil
+}
+
+
+func printTasks(tasks []Task) {
+	printAll := viper.GetBool("all")
+	for _, task := range tasks {
+		if !task.IsComplete {
+			fmt.Printf("ID: %d, Task: %s, CreatedAt: %s, IsComplete: %t\n", task.ID, task.Task, task.CreatedAt.Format("Mon Jan 2 15:04:05"), task.IsComplete)
+			continue
+		}
+		if printAll {
+			fmt.Printf("ID: %d, Task: %s, CreatedAt: %s, IsComplete: %t\n", task.ID, task.Task, task.CreatedAt.Format("Mon Jan 2 15:04:05"), task.IsComplete)
+		}
+	}
 }
