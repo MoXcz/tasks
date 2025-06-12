@@ -9,6 +9,7 @@
 - [ ] Add `export` command to export tasks to a file in a specific format (JSON or CSV).
 - [ ] Add `import` command to import tasks from a file in a specific format (JSON or CSV).
 - [ ] Maybe add `tags`
+- [x] Format `list` command: https://github.com/mergestat/timediff and text/tabwriter
 
 Inspired by:
 1. https://github.com/dreamsofcode-io/goprojects
