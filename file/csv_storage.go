@@ -62,7 +62,7 @@ func (s *CSVStorage) AddTask(task string) error {
 		}
 	}
 
-	record := []string{strconv.Itoa(lastID + 1), task, time.Now().Format("Mon Jan 2 15:04:05"), "false"}
+	record := []string{strconv.Itoa(lastID + 1), task, time.Now().Format(time.RFC1123), "false"}
 	// TODO: use time.Parse(), read the time and then timediff.TimeDiff(time.Now().Add(time.Parse()))
 	if err := csvWriter.Write(record); err != nil {
 		return fmt.Errorf("error writing task to file: %w", err)
@@ -133,7 +133,7 @@ func (s *CSVStorage) CompleteTask(id int) error {
 		record := []string{
 			strconv.Itoa(task.ID),
 			task.Task,
-			task.CreatedAt.Format("Mon Jan 2 15:04:05"),
+			task.CreatedAt.Format(time.RFC1123),
 			strconv.FormatBool(task.IsComplete),
 		}
 		if err := csvWriter.Write(record); err != nil {

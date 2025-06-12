@@ -29,7 +29,7 @@ func newTask(record []string) (Task, error) {
 
 	task := record[1]
 
-	createdAt, err := time.Parse("Mon Jan 2 15:04:05", record[2])
+	createdAt, err := time.Parse(time.RFC1123, record[2])
 	if err != nil {
 		return Task{}, fmt.Errorf("error parsing created at time: %w", err)
 	}
