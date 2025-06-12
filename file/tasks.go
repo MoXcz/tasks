@@ -2,7 +2,9 @@ package file
 
 import (
 	"fmt"
+	"os"
 	"strconv"
+	"text/tabwriter"
 	"time"
 
 	"github.com/spf13/viper"
@@ -42,16 +44,24 @@ func newTask(record []string) (Task, error) {
 	}, nil
 }
 
-
 func printTasks(tasks []Task) {
 	printAll := viper.GetBool("all")
+	tabW := tabwriter.NewWriter(os.Stdout, 0, 2, 2, ' ', 0)
+
+	tabW.Write(fmt.Appendf(nil, "ID\t Task\t Created\t Done\n"))
+
 	for _, task := range tasks {
 		if !task.IsComplete {
-			fmt.Printf("ID: %d, Task: %s, CreatedAt: %s, IsComplete: %t\n", task.ID, task.Task, task.CreatedAt.Format("Mon Jan 2 15:04:05"), task.IsComplete)
+			tabW.Write(fmt.Appendf(nil, "%d\t %s\t %s\t %t\n", task.ID, task.Task, task.CreatedAt.Format("Mon Jan 2 15:04:05"), task.IsComplete))
 			continue
 		}
 		if printAll {
-			fmt.Printf("ID: %d, Task: %s, CreatedAt: %s, IsComplete: %t\n", task.ID, task.Task, task.CreatedAt.Format("Mon Jan 2 15:04:05"), task.IsComplete)
+			tabW.Write(fmt.Appendf(nil, "%d\t %s\t %s\t %t\n", task.ID, task.Task, task.CreatedAt.Format("Mon Jan 2 15:04:05"), task.IsComplete))
 		}
+	}
+
+	if err := tabW.Flush(); err != nil {
+		fmt.Fprintf(os.Stderr, "Could not print tasks: %v\n", err)
+		return
 	}
 }
