@@ -3,6 +3,7 @@ module github.com/MoXcz/tasks
 go 1.24.1
 
 require (
+	github.com/mergestat/timediff v0.0.3
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.1
 )

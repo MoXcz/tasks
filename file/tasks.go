@@ -7,6 +7,7 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"github.com/mergestat/timediff"
 	"github.com/spf13/viper"
 )
 
@@ -51,12 +52,14 @@ func printTasks(tasks []Task) {
 	tabW.Write(fmt.Appendf(nil, "ID\t Task\t Created\t Done\n"))
 
 	for _, task := range tasks {
+		formattedCreatedAt := timediff.TimeDiff(task.CreatedAt)
+
 		if !task.IsComplete {
-			tabW.Write(fmt.Appendf(nil, "%d\t %s\t %s\t %t\n", task.ID, task.Task, task.CreatedAt.Format("Mon Jan 2 15:04:05"), task.IsComplete))
+			tabW.Write(fmt.Appendf(nil, "%d\t %s\t %s\t %t\n", task.ID, task.Task, formattedCreatedAt, task.IsComplete))
 			continue
 		}
 		if printAll {
-			tabW.Write(fmt.Appendf(nil, "%d\t %s\t %s\t %t\n", task.ID, task.Task, task.CreatedAt.Format("Mon Jan 2 15:04:05"), task.IsComplete))
+			tabW.Write(fmt.Appendf(nil, "%d\t %s\t %s\t %t\n", task.ID, task.Task, formattedCreatedAt, task.IsComplete))
 		}
 	}
 
