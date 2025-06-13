@@ -122,27 +122,8 @@ func (s *CSVStorage) CompleteTask(id int) error {
 		return fmt.Errorf("task with ID %d not found", id)
 	}
 
-	file, err := LoadFile(s.path)
-	if err != nil {
-		return fmt.Errorf("error loading file: %w", err)
-	}
-
-	os.Truncate(s.path, 0)
-	csvWriter := csv.NewWriter(file)
-	for _, task := range tasks {
-		record := []string{
-			strconv.Itoa(task.ID),
-			task.Task,
-			task.CreatedAt.Format(time.RFC1123),
-			strconv.FormatBool(task.IsComplete),
-		}
-		if err := csvWriter.Write(record); err != nil {
-			return fmt.Errorf("error writing task to file: %w", err)
-		}
-	}
-
-	csvWriter.Flush()
-	return nil
+	err = writeTasksCSV(s.path, tasks)
+	return err
 }
 
 func readTasksCSV(path string) ([]Task, error) {
@@ -176,4 +157,29 @@ func readTasksCSV(path string) ([]Task, error) {
 	}
 
 	return tasks, nil
+}
+
+func writeTasksCSV(path string, tasks []Task) error {
+	file, err := LoadFile(path)
+	if err != nil {
+		return fmt.Errorf("error loading file: %w", err)
+	}
+
+	os.Truncate(path, 0)
+	csvWriter := csv.NewWriter(file)
+	for _, task := range tasks {
+		record := []string{
+			strconv.Itoa(task.ID),
+			task.Task,
+			task.CreatedAt.Format(time.RFC1123),
+			strconv.FormatBool(task.IsComplete),
+		}
+		// TODO: check this, because if it fails it will remove the file contents, or fill it halfway at the point it errors out
+		if err := csvWriter.Write(record); err != nil {
+			return fmt.Errorf("error writing task to file: %w", err)
+		}
+	}
+
+	csvWriter.Flush()
+	return csvWriter.Error()
 }
