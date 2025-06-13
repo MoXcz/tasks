@@ -13,6 +13,7 @@ type FileStorage interface {
 	AddTask(task string) error
 	ListTasks() error
 	CompleteTask(id int) error
+	DeleteTask(id int) error
 }
 
 func SelectStorage() (FileStorage, error) {

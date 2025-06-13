@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
+	"slices"
 )
 
 type CSVStorage struct {
@@ -182,4 +183,32 @@ func writeTasksCSV(path string, tasks []Task) error {
 
 	csvWriter.Flush()
 	return csvWriter.Error()
+}
+
+func (s *CSVStorage) DeleteTask(id int) error {
+	if id <= 0 {
+		return fmt.Errorf("task ID must be greater than 0 %d", id)
+	}
+
+	tasks, err := readTasksCSV(s.path)
+	if err != nil {
+		return err // Error already formatted in readTasksCSV
+	}
+
+	var found bool
+	for i, task := range tasks {
+		if task.ID == id {
+			fmt.Println("Deleting task:", task.Task)
+			tasks = slices.Delete(tasks, i, i+1) // delete current task
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("task with ID %d not found", id)
+	}
+
+	err = writeTasksCSV(s.path, tasks)
+	return err
 }
