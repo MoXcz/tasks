@@ -19,7 +19,7 @@ var listCmd = &cobra.Command{
 tasks list to list all tasks`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
-			fmt.Fprintln(os.Stdin, "This command does not accept any arguments.")
+			fmt.Fprintln(os.Stdout, "This command does not accept any arguments.")
 			return
 		}
 

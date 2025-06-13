@@ -19,7 +19,7 @@ var completeCmd = &cobra.Command{
 tasks complete <task ID> to mark a task as completed`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
-			fmt.Fprintln(os.Stdin, "Please provide exactly one task ID to complete.")
+			fmt.Fprintln(os.Stdout, "Please provide exactly one task ID to complete.")
 			return
 		}
 

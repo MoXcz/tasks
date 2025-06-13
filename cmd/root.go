@@ -87,7 +87,7 @@ func initConfig() {
 				fmt.Fprintln(os.Stderr, "error writing default config", err)
 				os.Exit(1)
 			}
-			fmt.Fprintln(os.Stdin, "config file created at:", viper.ConfigFileUsed())
+			fmt.Fprintln(os.Stdout, "config file created at:", viper.ConfigFileUsed())
 		} else {
 			// Config file was found but another error was produced
 			fmt.Fprintln(os.Stderr, "error found in config:", viper.ConfigFileUsed())
@@ -98,7 +98,7 @@ func initConfig() {
 	// Config file found and successfully parsed
 	verbose := viper.GetBool("verbose")
 	if verbose == true {
-		fmt.Fprintln(os.Stdin, "using config file:", viper.ConfigFileUsed())
+		fmt.Fprintln(os.Stdout, "using config file:", viper.ConfigFileUsed())
 	}
 
 	s, err := file.SelectStorage()
