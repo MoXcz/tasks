@@ -7,26 +7,23 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"time"
-
-	"github.com/spf13/viper"
-	"slices"
 )
 
 type CSVStorage struct {
-	path string
+	filepath string
 }
 
-func NewCSVStorage(path string) (*CSVStorage, error) {
-	taskFile := viper.GetString("file")
+func NewCSVStorage(filepath string) *CSVStorage {
 	return &CSVStorage{
-		path: taskFile,
-	}, nil
+		filepath: filepath,
+	}
 }
 
 func (s *CSVStorage) AddTask(task string) error {
-	file, err := LoadFile(s.path)
+	file, err := LoadFile(s.filepath)
 	if err != nil {
 		return fmt.Errorf("error loading file: %w", err)
 	}
@@ -78,7 +75,7 @@ func (s *CSVStorage) AddTask(task string) error {
 }
 
 func (s *CSVStorage) ListTasks() error {
-	tasks, err := readTasksCSV(s.path)
+	tasks, err := readTasksCSV(s.filepath)
 	if err != nil {
 		return err // Error already formatted in readTasksCSV
 	}
@@ -100,7 +97,7 @@ func (s *CSVStorage) CompleteTask(id int) error {
 	}
 
 	found := false
-	tasks, err := readTasksCSV(s.path)
+	tasks, err := readTasksCSV(s.filepath)
 	if err != nil {
 		return err
 	}
@@ -123,7 +120,7 @@ func (s *CSVStorage) CompleteTask(id int) error {
 		return fmt.Errorf("task with ID %d not found", id)
 	}
 
-	err = writeTasksCSV(s.path, tasks)
+	err = writeTasksCSV(s.filepath, tasks)
 	return err
 }
 
@@ -190,7 +187,7 @@ func (s *CSVStorage) DeleteTask(id int) error {
 		return fmt.Errorf("task ID must be greater than 0 %d", id)
 	}
 
-	tasks, err := readTasksCSV(s.path)
+	tasks, err := readTasksCSV(s.filepath)
 	if err != nil {
 		return err // Error already formatted in readTasksCSV
 	}
@@ -209,6 +206,6 @@ func (s *CSVStorage) DeleteTask(id int) error {
 		return fmt.Errorf("task with ID %d not found", id)
 	}
 
-	err = writeTasksCSV(s.path, tasks)
+	err = writeTasksCSV(s.filepath, tasks)
 	return err
 }

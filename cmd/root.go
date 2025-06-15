@@ -101,7 +101,9 @@ func initConfig() {
 		fmt.Fprintln(os.Stdout, "using config file:", viper.ConfigFileUsed())
 	}
 
-	s, err := file.SelectStorage()
+	storageType := viper.GetString("storage")
+	filepath := viper.GetString("filepath")
+	s, err := file.SelectStorage(filepath, storageType)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error selecting storage:", err)
 		os.Exit(1) // TODO: most probably an invalid storage type, verify it
@@ -115,20 +117,20 @@ func writeDefaultConfig() error {
 	if err != nil {
 		return fmt.Errorf("could not find user config directory: %w", err)
 	}
-	filePath := configDir + "/tasks"
+	filepath := configDir + "/tasks"
 
 	// tasks.csv file for tasks is found at the same config directory by default,
 	// this is a personal choice
-	viper.SetDefault("file", filePath+"/tasks.csv")
+	viper.SetDefault("filepath", filepath+"/tasks.csv")
 	viper.SetDefault("verbose", false)
 	viper.SetDefault("storage", "csv")
 
-	err = os.Mkdir(filePath, 0755)
+	err = os.Mkdir(filepath, 0755)
 	if err != nil && !os.IsExist(err) {
 		return fmt.Errorf("could not create config directory: %w", err)
 	}
 
-	viper.SetConfigFile(filePath + "/tasks.yaml")
+	viper.SetConfigFile(filepath + "/tasks.yaml")
 	err = viper.WriteConfigAs(viper.ConfigFileUsed())
 	if err != nil {
 		return fmt.Errorf("could not write default config file: %w", err)

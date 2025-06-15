@@ -3,11 +3,7 @@ Copyright © 2025 Oscar Marquez
 */
 package file
 
-import (
-	"fmt"
-
-	"github.com/spf13/viper"
-)
+import "fmt"
 
 type FileStorage interface {
 	AddTask(task string) error
@@ -16,16 +12,10 @@ type FileStorage interface {
 	DeleteTask(id int) error
 }
 
-func SelectStorage() (FileStorage, error) {
-	storageType := viper.GetString("storage")
-	path := viper.GetString("file")
-
+func SelectStorage(path, storageType string) (FileStorage, error) {
 	switch storageType {
 	case "csv":
-		storage, err := NewCSVStorage(path)
-		if err != nil {
-			return nil, fmt.Errorf("error creating CSV storage: %w", err)
-		}
+		storage := NewCSVStorage(path)
 		return storage, nil
 		// case "json"
 		// case "sqlite":
