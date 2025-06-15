@@ -34,8 +34,6 @@ tasks delete <task ID> to delete a task from the list`,
 			fmt.Fprintf(os.Stderr, "Error deleting task: %v\n", err)
 			return
 		}
-
-		fmt.Fprintf(os.Stdout, "Task with ID %d has been deleted successfully.\n", taskID)
 	},
 }
 

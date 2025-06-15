@@ -4,11 +4,13 @@ Copyright © 2025 Oscar Marquez
 package file
 
 import (
+	"bufio"
 	"encoding/csv"
 	"fmt"
 	"os"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -196,7 +198,30 @@ func (s *CSVStorage) DeleteTask(id int) error {
 	}
 
 	var found bool
+
 	for i, task := range tasks {
+		if task.ID == id && !task.IsComplete {
+			for {
+				fmt.Printf("Are you sure you want to delete this uncompleted task ([y]es | [n]o)? ")
+				reader := bufio.NewReader(os.Stdin)
+				input, err := reader.ReadString('\n')
+				if err != nil {
+					fmt.Println("An error occured while reading input. Please try again", err)
+					continue
+				}
+
+				input = strings.TrimSuffix(input, "\n") // remove trailing \n
+
+				if input == "no" || input == "n" {
+					return nil
+				}
+
+				if input == "yes" || input == "y" {
+					break // enter next conditional and delete the task
+				}
+			}
+		}
+
 		if task.ID == id {
 			fmt.Println("Deleting task:", task.Task)
 			tasks = slices.Delete(tasks, i, i+1) // delete current task
