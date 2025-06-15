@@ -164,6 +164,10 @@ func writeTasksCSV(path string, tasks []Task) error {
 
 	os.Truncate(path, 0)
 	csvWriter := csv.NewWriter(file)
+	if err := csvWriter.Write([]string{"ID", "Task", "CreatedAt", "IsComplete"}); err != nil {
+		return fmt.Errorf("error writing header to file: %w", err)
+	}
+
 	for _, task := range tasks {
 		record := []string{
 			strconv.Itoa(task.ID),
