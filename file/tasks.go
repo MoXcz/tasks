@@ -35,7 +35,7 @@ func newTask(record []string) (Task, error) {
 		return Task{}, fmt.Errorf("error parsing created at time: %w", err)
 	}
 
-	isComplete := record[3]
+	isComplete := record[3] // any other value than "true" will default to "false"
 
 	return Task{
 		ID:         id,
