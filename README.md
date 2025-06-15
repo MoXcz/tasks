@@ -73,6 +73,7 @@ go build .
 - [x] Format `list` command: https://github.com/mergestat/timediff and text/tabwriter
 - [ ] Add support for JSON and SQLite
 - [ ] Refactor how the task file is handled when rewriting it.
+- [ ] Re-order tasks after deletion (when a tasks is deleted)
 
 Inspired by:
 1. https://github.com/dreamsofcode-io/goprojects
