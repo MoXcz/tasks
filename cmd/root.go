@@ -107,6 +107,7 @@ func initConfig() {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error selecting storage:", err)
 		os.Exit(1) // TODO: most probably an invalid storage type, verify it
+		// This could also happen when the config file and the tasks are on the same dir
 	}
 	storage = s
 }
@@ -119,9 +120,14 @@ func writeDefaultConfig() error {
 	}
 	filepath := configDir + "/tasks"
 
-	// tasks.csv file for tasks is found at the same config directory by default,
+	// file for tasks is found at the same config directory by default,
 	// this is a personal choice
-	viper.SetDefault("filepath", filepath+"/tasks.csv")
+	// TODO: When storage type changes "tasks" breaks, easy solution is to change
+	// file name depending on the storage type
+	// Maybe wait until import/export? it could be easy once that's implemented
+	// to just export tasks to the new storage type and the import it in the same
+	// file
+	viper.SetDefault("filepath", filepath+"/tasks")
 	viper.SetDefault("verbose", false)
 	viper.SetDefault("storage", "csv")
 
