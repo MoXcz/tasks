@@ -15,9 +15,9 @@ type FileStorage interface {
 func SelectStorage(path, storageType string) (FileStorage, error) {
 	switch storageType {
 	case "csv":
-		storage := NewCSVStorage(path)
-		return storage, nil
-		// case "json"
+		return NewCSVStorage(path), nil
+	case "json":
+		return NewJSONStorage(path), nil
 		// case "sqlite":
 	default:
 		return nil, fmt.Errorf("unsupported storage type: %s", storageType)
