@@ -11,8 +11,8 @@ import (
 type FileStorage interface {
 	AddTask(task string) error
 	ListTasks(w io.Writer) error
-	CompleteTask(id int) error
-	DeleteTask(id int) error
+	CompleteTask(w io.Writer, id int) error
+	DeleteTask(w io.Writer, id int) error
 }
 
 func SelectStorage(path, storageType string) (FileStorage, error) {

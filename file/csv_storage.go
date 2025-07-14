@@ -13,6 +13,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 type CSVStorage struct {
@@ -93,7 +95,7 @@ func (s *CSVStorage) ListTasks(w io.Writer) error {
 	return nil
 }
 
-func (s *CSVStorage) CompleteTask(id int) error {
+func (s *CSVStorage) CompleteTask(w io.Writer, id int) error {
 	if id <= 0 {
 		return fmt.Errorf("task ID must be greater than 0, got %d", id)
 	}
@@ -111,7 +113,7 @@ func (s *CSVStorage) CompleteTask(id int) error {
 			return fmt.Errorf("task with ID %d is already completed", id)
 		}
 		if task.ID == id {
-			fmt.Println("Completing task:", task.Task)
+			fmt.Fprintln(w, "Completing task:", task.Task)
 			tasks[i].IsComplete = true
 			found = true
 			break
@@ -164,6 +166,7 @@ func writeTasksCSV(path string, tasks []Task) error {
 	if err != nil {
 		return fmt.Errorf("error loading file: %w", err)
 	}
+	defer CloseFile(file)
 
 	os.Truncate(path, 0)
 	csvWriter := csv.NewWriter(file)
@@ -188,7 +191,8 @@ func writeTasksCSV(path string, tasks []Task) error {
 	return csvWriter.Error()
 }
 
-func (s *CSVStorage) DeleteTask(id int) error {
+func (s *CSVStorage) DeleteTask(w io.Writer, id int) error {
+	force := viper.GetBool("force")
 	if id <= 0 {
 		return fmt.Errorf("task ID must be greater than 0 %d", id)
 	}
@@ -203,28 +207,32 @@ func (s *CSVStorage) DeleteTask(id int) error {
 	for i, task := range tasks {
 		if task.ID == id && !task.IsComplete {
 			for {
-				fmt.Printf("Are you sure you want to delete this uncompleted task ([y]es | [n]o)? ")
-				reader := bufio.NewReader(os.Stdin)
-				input, err := reader.ReadString('\n')
-				if err != nil {
-					fmt.Println("An error occured while reading input. Please try again", err)
-					continue
-				}
+				if !force {
+					fmt.Printf("Are you sure you want to delete this uncompleted task ([y]es | [n]o)? ")
+					reader := bufio.NewReader(os.Stdin)
+					input, err := reader.ReadString('\n')
+					if err != nil {
+						fmt.Println("An error occured while reading input. Please try again", err)
+						continue
+					}
 
-				input = strings.TrimSuffix(input, "\n") // remove trailing \n
+					input = strings.TrimSuffix(input, "\n") // remove trailing \n
 
-				if input == "no" || input == "n" {
-					return nil
-				}
+					if input == "no" || input == "n" {
+						return nil
+					}
 
-				if input == "yes" || input == "y" {
-					break // enter next conditional and delete the task
+					if input == "yes" || input == "y" {
+						break // enter next conditional and delete the task
+					}
+				} else {
+					break
 				}
 			}
 		}
 
 		if task.ID == id {
-			fmt.Println("Deleting task:", task.Task)
+			fmt.Fprintln(w, "Deleting task:", task.Task)
 			tasks = slices.Delete(tasks, i, i+1) // delete current task
 			found = true
 			break

@@ -5,16 +5,16 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/MoXcz/tasks/file"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // deleteCmd represents the delete command
 func newDeleteCmd(storage *file.FileStorage) *cobra.Command {
-	return &cobra.Command{
+	var deleteCmd = &cobra.Command{
 		Use:   "delete",
 		Short: "delete a task",
 		Long: `delete a task
@@ -28,14 +28,18 @@ tasks delete <task ID> to delete a task from the list`,
 			ID := args[0]
 			taskID, err := strconv.Atoi(ID)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Invalid task ID: %s.\n", ID)
+				fmt.Fprintf(cmd.OutOrStderr(), "Invalid task ID: %s.\n", ID)
 				return
 			}
 
-			if err := (*storage).DeleteTask(taskID); err != nil {
-				fmt.Fprintf(os.Stderr, "Error deleting task: %v\n", err)
+			if err := (*storage).DeleteTask(cmd.OutOrStdout(), taskID); err != nil {
+				fmt.Fprintf(cmd.OutOrStderr(), "Error deleting task: %v\n", err)
 				return
 			}
 		},
 	}
+
+	deleteCmd.Flags().BoolP("force", "f", false, "Skip confirmation")
+	viper.BindPFlag("force", deleteCmd.Flags().Lookup("force"))
+	return deleteCmd
 }

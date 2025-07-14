@@ -69,10 +69,10 @@ func (s *JSONStorage) ListTasks(w io.Writer) error {
 	return nil
 }
 
-func (s *JSONStorage) CompleteTask(id int) error {
+func (s *JSONStorage) CompleteTask(w io.Writer, id int) error {
 	return nil
 }
 
-func (s *JSONStorage) DeleteTask(id int) error {
+func (s *JSONStorage) DeleteTask(w io.Writer, id int) error {
 	return nil
 }
