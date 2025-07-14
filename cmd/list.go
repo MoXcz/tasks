@@ -7,32 +7,31 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/MoXcz/tasks/file"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 // listCmd represents the list command
-var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "list all tasks",
-	Long: `list all tasks
-tasks list to list all tasks`,
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 0 {
-			fmt.Fprintln(os.Stdout, "This command does not accept any arguments.")
-			return
-		}
+func newListCmd(storage *file.FileStorage) *cobra.Command {
+	var listCmd = &cobra.Command{
+		Use:   "list",
+		Short: "list all tasks",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) > 0 {
+				return fmt.Errorf("This command does not accept any arguments")
+			}
 
-		if err := storage.ListTasks(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error listing tasks: %v\n", err)
-			return
-		}
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(listCmd)
+			if err := (*storage).ListTasks(cmd.OutOrStdout()); err != nil {
+				fmt.Fprintf(os.Stderr, "Error listing tasks: %v\n", err)
+				return fmt.Errorf("Error listing tasks: %w", err)
+			}
+			return nil
+		},
+	}
 
 	listCmd.Flags().BoolP("all", "a", false, "List all tasks including completed ones")
 	viper.BindPFlag("all", listCmd.Flags().Lookup("all"))
+
+	return listCmd
 }
