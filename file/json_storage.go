@@ -65,7 +65,7 @@ func (s *JSONStorage) AddTask(task string) error {
 	return nil
 }
 
-func (s *JSONStorage) ListTasks() error {
+func (s *JSONStorage) ListTasks(w io.Writer) error {
 	return nil
 }
 

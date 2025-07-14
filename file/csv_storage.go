@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
 	"slices"
 	"strconv"
@@ -75,7 +76,7 @@ func (s *CSVStorage) AddTask(task string) error {
 	return nil
 }
 
-func (s *CSVStorage) ListTasks() error {
+func (s *CSVStorage) ListTasks(w io.Writer) error {
 	tasks, err := readTasksCSV(s.filepath)
 	if err != nil {
 		return err // Error already formatted in readTasksCSV
@@ -86,8 +87,8 @@ func (s *CSVStorage) ListTasks() error {
 		return nil
 	}
 
-	fmt.Println("Total tasks:", len(tasks))
-	printTasks(tasks)
+	fmt.Fprintln(w, "Total tasks:", len(tasks))
+	printTasks(w, tasks)
 
 	return nil
 }

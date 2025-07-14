@@ -2,6 +2,7 @@ package file
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"text/tabwriter"
@@ -45,9 +46,9 @@ func newTask(record []string) (Task, error) {
 	}, nil
 }
 
-func printTasks(tasks []Task) {
+func printTasks(w io.Writer, tasks []Task) {
 	printAll := viper.GetBool("all")
-	tabW := tabwriter.NewWriter(os.Stdout, 0, 2, 2, ' ', 0)
+	tabW := tabwriter.NewWriter(w, 0, 2, 2, ' ', 0)
 
 	tabW.Write(fmt.Appendf(nil, "ID\t Task\t Created\t Done\n"))
 
