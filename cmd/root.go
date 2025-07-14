@@ -29,9 +29,11 @@ func NewRootCmd(cfg config.Config) *cobra.Command {
 		Use:   "tasks",
 		Short: "A task management CLI that tries to mimic the common TODO web application",
 		Long: `tasks is a CLI tool to manage your tasks, that's it.
-tasks add <task> to add a new task
-tasks complete <task id> to mark a task as completed
-tasks list to list all tasks
+
+	tasks add <task> to add a new task
+	tasks list to list all tasks
+	tasks complete <task id> to mark a task as completed
+	tasks delete <task id> to delete a task
 `,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			var err error
