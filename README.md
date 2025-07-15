@@ -70,10 +70,11 @@ go build .
 - [ ] Add `export` command to export tasks to a file in a specific format (JSON or CSV).
 - [ ] Add `import` command to import tasks from a file in a specific format (JSON or CSV).
 - [ ] Maybe add `tags`
-- [x] Format `list` command: https://github.com/mergestat/timediff and text/tabwriter
-- [ ] Add support for JSON and SQLite
+- [ ] Add support for SQLite
 - [ ] Refactor how the task file is handled when rewriting it.
 - [ ] Re-order tasks after deletion (when a tasks is deleted)
+- [x] Add support for JSON
+- [x] Format `list` command: https://github.com/mergestat/timediff and text/tabwriter
 
 Inspired by:
 1. https://github.com/dreamsofcode-io/goprojects
