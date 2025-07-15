@@ -124,8 +124,7 @@ func (s *CSVStorage) CompleteTask(w io.Writer, id int) error {
 		return fmt.Errorf("task with ID %d not found", id)
 	}
 
-	err = writeTasksCSV(s.filepath, tasks)
-	return err
+	return writeTasksCSV(s.filepath, tasks)
 }
 
 func (s *CSVStorage) DeleteTask(w io.Writer, id int) error {
