@@ -19,30 +19,36 @@ type Task struct {
 	IsComplete bool
 }
 
-func newTask(record []string) (Task, error) {
-	if len(record) < 4 {
-		return Task{}, fmt.Errorf("record does not contain enough fields: %v", record)
+func newTask(taskID, task, created, isComplete string) (Task, error) {
+	// TODO: is it necessary to type check this?
+	if taskID == "" {
+		return Task{}, fmt.Errorf("taksID is empty: %s", taskID)
+	}
+	if task == "" {
+		return Task{}, fmt.Errorf("task description is empty: %s", task)
+	}
+	if created == "" {
+		return Task{}, fmt.Errorf("createdAt is empty: %s", created)
+	}
+	if isComplete == "" {
+		return Task{}, fmt.Errorf("isComplete is empty: %s", created)
 	}
 
-	id, err := strconv.Atoi(record[0])
+	id, err := strconv.Atoi(taskID)
 	if err != nil {
 		return Task{}, fmt.Errorf("error converting ID to integer: %w", err)
 	}
 
-	task := record[1]
-
-	createdAt, err := time.Parse(time.RFC1123, record[2])
+	createdAt, err := time.Parse(time.RFC1123, created)
 	if err != nil {
 		return Task{}, fmt.Errorf("error parsing created at time: %w", err)
 	}
-
-	isComplete := record[3] // any other value than "true" will default to "false"
 
 	return Task{
 		ID:         id,
 		Task:       task,
 		CreatedAt:  createdAt,
-		IsComplete: isComplete == "true",
+		IsComplete: isComplete == "true", // any other value than "true" will default to "false"
 	}, nil
 }
 
@@ -50,6 +56,7 @@ func printTasks(w io.Writer, tasks []Task) {
 	printAll := viper.GetBool("all")
 	tabW := tabwriter.NewWriter(w, 0, 2, 2, ' ', 0)
 
+	// TODO: errors?
 	tabW.Write(fmt.Appendf(nil, "ID\t Task\t Created\t Done\n"))
 
 	for _, task := range tasks {

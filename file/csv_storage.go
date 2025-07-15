@@ -198,16 +198,17 @@ func readTasksCSV(path string) ([]Task, error) {
 		return nil, fmt.Errorf("error reading CSV file: %w", err)
 	}
 
+	// TODO: check whether if longer returning an error broke something
 	if len(records) == 0 {
-		fmt.Println("No tasks found in the file")
-		return nil, nil
+		return []Task{}, nil
 	}
+
 	var tasks []Task
 	for _, record := range records {
 		if record[0] == "ID" {
 			continue // Skip the header row
 		}
-		task, err := newTask(record)
+		task, err := newTask(record[0], record[1], record[2], record[3])
 		if err != nil {
 			return nil, err
 		}

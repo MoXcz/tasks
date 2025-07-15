@@ -46,7 +46,7 @@ func Test_newTask(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := newTask(tt.record)
+			got, gotErr := newTask(tt.record[0], tt.record[1], tt.record[2], tt.record[3])
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("newTask() failed: %v", gotErr)
