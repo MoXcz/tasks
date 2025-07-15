@@ -16,7 +16,6 @@ func TestCLIIntegration(t *testing.T) {
 		name  string
 		cfg   config.Config
 		DoAll bool
-		Add   bool
 	}{
 		{
 			name:  "CSV cmd",
@@ -37,6 +36,8 @@ func TestCLIIntegration(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		task1 := "Rice linux"
+		task2 := "Configure Neovim"
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.DoAll {
 				// Add task
@@ -45,13 +46,20 @@ func TestCLIIntegration(t *testing.T) {
 					t.Fatalf("add command failed: %v", err)
 				}
 
+				if err := runCommand(tt.cfg, buf, "add", "Configure Neovim"); err != nil {
+					t.Fatalf("add command failed: %v", err)
+				}
+
 				// List tasks
 				buf.Reset()
 				if err := runCommand(tt.cfg, buf, "list"); err != nil {
 					t.Fatalf("list command failed: %v", err)
 				}
-				if !strings.Contains(buf.String(), "Rice linux") {
-					t.Errorf("expected task in list, got %q", buf.String())
+				if !strings.Contains(buf.String(), task1) {
+					t.Errorf("expected task in list %q, got %q", task1, buf.String())
+				}
+				if !strings.Contains(buf.String(), task2) {
+					t.Errorf("expected task in list %q, got %q", task2, buf.String())
 				}
 
 				// Complete task
@@ -63,6 +71,24 @@ func TestCLIIntegration(t *testing.T) {
 					t.Errorf("expected completed task %q, got %q", "Rice linux", buf.String())
 				}
 
+				// Do not list completed task
+				buf.Reset()
+				if err := runCommand(tt.cfg, buf, "list"); err != nil {
+					t.Fatalf("list command failed: %v", err)
+				}
+				if strings.Contains(buf.String(), task1) {
+					t.Errorf("not expected task in list %q, got %q", task1, buf.String())
+				}
+
+				// List completed task
+				buf.Reset()
+				if err := runCommand(tt.cfg, buf, "list", "--all"); err != nil {
+					t.Fatalf("list command failed: %v", err)
+				}
+				if !strings.Contains(buf.String(), task1) {
+					t.Errorf("not expected task in list %q, got %q", task1, buf.String())
+				}
+
 				// Delete task
 				buf.Reset()
 				if err := runCommand(tt.cfg, buf, "delete", "1", "--force"); err != nil {
@@ -71,19 +97,15 @@ func TestCLIIntegration(t *testing.T) {
 				if !strings.Contains(buf.String(), "Deleting task: Rice linux") {
 					t.Errorf("expected deleted task %q, got %q", "Rice linux", buf.String())
 				}
-			}
 
-			rootCmd := NewRootCmd(tt.cfg)
-			if tt.Add {
-				buf := &bytes.Buffer{}
-				rootCmd.SetOut(buf)
-				rootCmd.SetArgs([]string{
-					"add", "Rice linux",
-				})
-				if err := rootCmd.Execute(); err != nil {
-					t.Fatalf("add command failed: %v", err)
+				// Do not list deleted task
+				buf.Reset()
+				if err := runCommand(tt.cfg, buf, "list", "--all"); err != nil {
+					t.Fatalf("list command failed: %v", err)
 				}
-
+				if strings.Contains(buf.String(), task1) {
+					t.Errorf("not expected task in list %q, got %q", task1, buf.String())
+				}
 			}
 		})
 	}
