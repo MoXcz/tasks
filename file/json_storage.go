@@ -66,7 +66,32 @@ func (s *JSONStorage) ListTasks(w io.Writer) error {
 }
 
 func (s *JSONStorage) CompleteTask(w io.Writer, id int) error {
-	return nil
+	if id <= 0 {
+		return fmt.Errorf("task ID must be greater than 0, got %d", id)
+	}
+
+	found := false
+	tasks, err := readTasksJSON(s.filepath)
+	if err != nil {
+		return err
+	}
+
+	for i, task := range tasks {
+		if task.ID == id && task.IsComplete {
+			return fmt.Errorf("task with ID %d is already completed", id)
+		}
+		if task.ID == id {
+			fmt.Fprintln(w, "Completing task:", task.Task)
+			tasks[i].IsComplete = true
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("task with ID %d not found", id)
+	}
+	return writeTasksJSON(s.filepath, tasks)
 }
 
 func (s *JSONStorage) DeleteTask(w io.Writer, id int) error {
@@ -98,4 +123,22 @@ func readTasksJSON(path string) ([]Task, error) {
 		return []Task{}, nil // no tasks, does nil work here?
 	}
 	return tasks, nil
+}
+
+func writeTasksJSON(path string, tasks []Task) error {
+	file, err := LoadFile(path)
+	if err != nil {
+		return fmt.Errorf("error loading file: %w", err)
+	}
+	defer CloseFile(file)
+
+	os.Truncate(path, 0)
+
+	// TODO: check this, because if it fails it will remove the file contents, or fill it halfway at the point it errors out
+	data, err := json.Marshal(&tasks)
+	if err != nil {
+		return fmt.Errorf("could not marshal tasks: %w", err)
+	}
+
+	return os.WriteFile(path, data, 0644)
 }
