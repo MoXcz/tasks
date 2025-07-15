@@ -19,7 +19,7 @@ func TestCLIIntegration(t *testing.T) {
 		Add   bool
 	}{
 		{
-			name:  "CSV add and list",
+			name:  "CSV cmd",
 			DoAll: true,
 			cfg: config.Config{
 				Filepath: filepath.Join(dir, "tasks"),
@@ -27,8 +27,8 @@ func TestCLIIntegration(t *testing.T) {
 			},
 		},
 		{
-			name: "JSON add",
-			Add:  true,
+			name:  "JSON cmd",
+			DoAll: true,
 			cfg: config.Config{
 				Filepath: filepath.Join(dir, "tasks"),
 				Storage:  "json",
