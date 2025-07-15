@@ -128,6 +128,62 @@ func (s *CSVStorage) CompleteTask(w io.Writer, id int) error {
 	return err
 }
 
+func (s *CSVStorage) DeleteTask(w io.Writer, id int) error {
+	force := viper.GetBool("force")
+	if id <= 0 {
+		return fmt.Errorf("task ID must be greater than 0 %d", id)
+	}
+
+	tasks, err := readTasksCSV(s.filepath)
+	if err != nil {
+		return err // Error already formatted in readTasksCSV
+	}
+
+	var found bool
+
+	for i, task := range tasks {
+		if task.ID == id && !task.IsComplete {
+			for {
+				if !force {
+					fmt.Printf("Are you sure you want to delete this uncompleted task ([y]es | [n]o)? ")
+					reader := bufio.NewReader(os.Stdin)
+					input, err := reader.ReadString('\n')
+					if err != nil {
+						fmt.Println("An error occured while reading input. Please try again", err)
+						continue
+					}
+
+					input = strings.TrimSuffix(input, "\n") // remove trailing \n
+
+					if input == "no" || input == "n" {
+						return nil
+					}
+
+					if input == "yes" || input == "y" {
+						break // enter next conditional and delete the task
+					}
+				} else {
+					break
+				}
+			}
+		}
+
+		if task.ID == id {
+			fmt.Fprintln(w, "Deleting task:", task.Task)
+			tasks = slices.Delete(tasks, i, i+1) // delete current task
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("task with ID %d not found", id)
+	}
+
+	err = writeTasksCSV(s.filepath, tasks)
+	return err
+}
+
 func readTasksCSV(path string) ([]Task, error) {
 	file, err := LoadFile(path)
 	if err != nil {
@@ -189,60 +245,4 @@ func writeTasksCSV(path string, tasks []Task) error {
 
 	csvWriter.Flush()
 	return csvWriter.Error()
-}
-
-func (s *CSVStorage) DeleteTask(w io.Writer, id int) error {
-	force := viper.GetBool("force")
-	if id <= 0 {
-		return fmt.Errorf("task ID must be greater than 0 %d", id)
-	}
-
-	tasks, err := readTasksCSV(s.filepath)
-	if err != nil {
-		return err // Error already formatted in readTasksCSV
-	}
-
-	var found bool
-
-	for i, task := range tasks {
-		if task.ID == id && !task.IsComplete {
-			for {
-				if !force {
-					fmt.Printf("Are you sure you want to delete this uncompleted task ([y]es | [n]o)? ")
-					reader := bufio.NewReader(os.Stdin)
-					input, err := reader.ReadString('\n')
-					if err != nil {
-						fmt.Println("An error occured while reading input. Please try again", err)
-						continue
-					}
-
-					input = strings.TrimSuffix(input, "\n") // remove trailing \n
-
-					if input == "no" || input == "n" {
-						return nil
-					}
-
-					if input == "yes" || input == "y" {
-						break // enter next conditional and delete the task
-					}
-				} else {
-					break
-				}
-			}
-		}
-
-		if task.ID == id {
-			fmt.Fprintln(w, "Deleting task:", task.Task)
-			tasks = slices.Delete(tasks, i, i+1) // delete current task
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		return fmt.Errorf("task with ID %d not found", id)
-	}
-
-	err = writeTasksCSV(s.filepath, tasks)
-	return err
 }
