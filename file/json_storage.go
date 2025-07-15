@@ -32,7 +32,7 @@ func (s *JSONStorage) AddTask(task string) error {
 		return err
 	}
 
-	lastID := 0
+	lastID := 1
 	if len(tasks) != 0 {
 		lastID = tasks[len(tasks)-1].ID // should be last task
 	}
@@ -151,8 +151,7 @@ func (s *JSONStorage) DeleteTask(w io.Writer, id int) error {
 		return fmt.Errorf("task with ID %d not found", id)
 	}
 
-	err = writeTasksJSON(s.filepath, tasks)
-	return err
+	return writeTasksJSON(s.filepath, tasks)
 }
 
 func readTasksJSON(path string) ([]Task, error) {
@@ -174,11 +173,13 @@ func readTasksJSON(path string) ([]Task, error) {
 	}
 
 	if fileInfo.Size() == 0 {
-		if err := json.Unmarshal(fileContent, &tasks); err != nil {
-			return nil, fmt.Errorf("error unmarshalling file: %w", err)
-		}
 		return []Task{}, nil // no tasks, does nil work here?
 	}
+
+	if err := json.Unmarshal(fileContent, &tasks); err != nil {
+		return nil, fmt.Errorf("error unmarshalling file: %w", err)
+	}
+
 	return tasks, nil
 }
 
