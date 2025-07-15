@@ -7,13 +7,15 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"syscall"
 )
 
 // Load file with exclusive lock.
 // Check if the file exists, if not create it with read-write permissions
-func LoadFile(filepath string) (*os.File, error) {
-	file, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+func LoadFile(filename string) (*os.File, error) {
+	cleanFilename := filepath.Clean(filename)
+	file, err := os.OpenFile(cleanFilename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file for reading")
 	}
@@ -29,7 +31,9 @@ func LoadFile(filepath string) (*os.File, error) {
 
 // Release the lock on the file descriptor and close the file
 func CloseFile(file *os.File) error {
-	syscall.Flock(int(file.Fd()), syscall.LOCK_UN)
+	if err := syscall.Flock(int(file.Fd()), syscall.LOCK_UN); err != nil {
+		return err
+	}
 	return file.Close()
 }
 

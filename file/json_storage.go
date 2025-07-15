@@ -49,7 +49,9 @@ func (s *JSONStorage) AddTask(task string) error {
 		return fmt.Errorf("could not marshal tasks: %w", err)
 	}
 
-	os.WriteFile(s.filepath, data, 0644)
+	if err := os.WriteFile(s.filepath, data, 0600); err != nil {
+		return fmt.Errorf("could not write data to file: %w", err)
+	}
 	return nil
 }
 
@@ -190,7 +192,9 @@ func writeTasksJSON(path string, tasks []Task) error {
 	}
 	defer CloseFile(file)
 
-	os.Truncate(path, 0)
+	if err := os.Truncate(path, 0); err != nil {
+		return fmt.Errorf("error truncating the file: %w", err)
+	}
 
 	// TODO: check this, because if it fails it will remove the file contents, or fill it halfway at the point it errors out
 	data, err := json.Marshal(&tasks)
@@ -198,5 +202,5 @@ func writeTasksJSON(path string, tasks []Task) error {
 		return fmt.Errorf("could not marshal tasks: %w", err)
 	}
 
-	return os.WriteFile(path, data, 0644)
+	return os.WriteFile(path, data, 0600)
 }

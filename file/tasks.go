@@ -56,18 +56,30 @@ func printTasks(w io.Writer, tasks []Task) {
 	printAll := viper.GetBool("all")
 	tabW := tabwriter.NewWriter(w, 0, 2, 2, ' ', 0)
 
-	// TODO: errors?
-	tabW.Write(fmt.Appendf(nil, "ID\t Task\t Created\t Done\n"))
+	// TODO: perhaps it's better to return the error here?
+	_, err := tabW.Write(fmt.Appendf(nil, "ID\t Task\t Created\t Done\n"))
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "Could not write header to stdout: %v\n", err)
+		return
+	}
 
 	for _, task := range tasks {
 		formattedCreatedAt := timediff.TimeDiff(task.CreatedAt)
 
 		if !task.IsComplete {
-			tabW.Write(fmt.Appendf(nil, "%d\t %s\t %s\t %t\n", task.ID, task.Task, formattedCreatedAt, task.IsComplete))
+			_, err := tabW.Write(fmt.Appendf(nil, "%d\t %s\t %s\t %t\n", task.ID, task.Task, formattedCreatedAt, task.IsComplete))
+			if err != nil {
+				fmt.Fprintf(os.Stdout, "Could not write to stdout: %v\n", err)
+				return
+			}
 			continue
 		}
 		if printAll {
-			tabW.Write(fmt.Appendf(nil, "%d\t %s\t %s\t %t\n", task.ID, task.Task, formattedCreatedAt, task.IsComplete))
+			_, err := tabW.Write(fmt.Appendf(nil, "%d\t %s\t %s\t %t\n", task.ID, task.Task, formattedCreatedAt, task.IsComplete))
+			if err != nil {
+				fmt.Fprintf(os.Stdout, "Could not write to stdout: %v\n", err)
+				return
+			}
 		}
 	}
 

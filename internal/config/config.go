@@ -64,7 +64,7 @@ func writeDefaultConfig() error {
 	viper.SetDefault("verbose", false)
 	viper.SetDefault("storage", "csv") // TODO: change default to sqlite
 
-	if err := os.MkdirAll(dir, 0755); err != nil && !os.IsExist(err) {
+	if err := os.MkdirAll(dir, 0700); err != nil && !os.IsExist(err) {
 		return fmt.Errorf("could not create config directory: %w", err)
 	}
 

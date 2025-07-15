@@ -223,7 +223,9 @@ func writeTasksCSV(path string, tasks []Task) error {
 	}
 	defer CloseFile(file)
 
-	os.Truncate(path, 0)
+	if err := os.Truncate(path, 0); err != nil {
+		return fmt.Errorf("error truncating the file: %w", err)
+	}
 	csvWriter := csv.NewWriter(file)
 	if err := csvWriter.Write([]string{"ID", "Task", "CreatedAt", "IsComplete"}); err != nil {
 		return fmt.Errorf("error writing header to file: %w", err)

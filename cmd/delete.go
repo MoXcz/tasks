@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/MoXcz/tasks/file"
@@ -40,6 +41,8 @@ tasks delete <task ID> to delete a task from the list`,
 	}
 
 	deleteCmd.Flags().BoolP("force", "f", false, "Skip confirmation")
-	viper.BindPFlag("force", deleteCmd.Flags().Lookup("force"))
+	if err := viper.BindPFlag("force", deleteCmd.Flags().Lookup("force")); err != nil {
+		fmt.Fprintf(os.Stderr, "error binding --force flag: %v\n", err)
+	}
 	return deleteCmd
 }
